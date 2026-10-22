@@ -22,6 +22,58 @@ build, run `npm run build` and then `npm start`. Neither command publishes or
 deploys anything. No accounts, credentials, AI API, backend, or paid service are
 required.
 
+## Install on your phone
+
+The production app supports home-screen installation and offline use. It has not
+been deployed: the private GitHub repository is source code, not a phone
+installation link. Publish a production build to a trusted **HTTPS** website
+before the first phone installation. Hosting is a separate, explicit action.
+Use a host that runs `npm run build`, serves `public` and Next.js runtime assets,
+and preserves the configured `/sw.js` response headers. Deploy at the website
+root; subpath hosting is not configured.
+
+1. Open the HTTPS app address on your phone while connected to the internet.
+   Wait until **Ready for offline use** appears above the planner.
+2. **Android / Chrome:** select **Install MMF Studio** when offered, or use the
+   browser's install-app menu.
+3. **iPhone / iPad:** open the website in Safari, select **Share > Add to Home
+   Screen**, enable **Open as Web App** when shown, then select **Add**.
+4. Launch the home-screen icon while online once. Confirm it is ready, then try
+   airplane mode: close and reopen the app and check that the saved plan appears.
+
+After that complete download, projections, plan editing, scenarios, and JSON,
+CSV, and Excel operations work offline without your computer running. Updates
+need an internet connection. Your phone's `127.0.0.1` points to the phone, not the
+computer. An ordinary HTTP computer/LAN address is not a trusted phone installation
+origin; desktop localhost works only for local testing.
+
+To move an existing plan, export its **JSON backup** on the computer and import
+that file under **Data & recovery** on the phone. Devices, browsers, website
+addresses, and sometimes the installed web-app context have separate storage.
+There is no automatic synchronization. If an installed app opens empty, import
+the backup there.
+
+Installation is not a backup. Clearing site data, uninstalling, private browsing,
+or device storage eviction can remove both plans and offline files. **Request
+persistent device storage** asks the browser to reduce automatic eviction; approval
+depends on the browser and does not prevent manual clearing. Keep regular JSON
+backups outside the app.
+
+### Offline downloads and updates
+
+Offline setup is enabled only in production. The build generates PNG installation
+icons and a versioned worker that caches a build-pinned HTML snapshot and all runtime
+chunks, including deferred spreadsheet code. Cache repair cannot replace an older
+shell with an incompatible newer homepage. **Ready for offline use** verifies
+the complete cache, not merely worker registration. An incomplete download or
+missing cache is reported; reconnect and select **Retry offline setup**.
+
+New workers wait for approval instead of reloading open forms automatically.
+Save drafts, export a backup, and select **Apply app update** when ready. It reloads
+this tab only after confirmation and does not migrate or clear financial storage.
+The previous application cache is retained for older open tabs' deferred chunks;
+unrelated caches are untouched. Close old tabs when practical.
+
 ## First use
 
 1. Open **Accounts** and enter your real opening capital, opening date, and
@@ -200,12 +252,22 @@ npm run lint
 npm run format:check
 npm run build
 npm run test:e2e
+npm run test:e2e:pwa
 ```
 
 If Playwright reports a missing Chromium binary, run
 `npx playwright install chromium`, then rerun the browser tests. Tests use synthetic
 data in isolated browser contexts and an owned development server on port 3317.
 They do not read or modify your normal browser workspace.
+
+The PWA command builds production and starts an owned server on port 3318. It runs
+Chromium and phone-emulated WebKit; if WebKit is missing, run
+`npx playwright install webkit`. These checks cover install metadata, a cold
+offline launch, saved-plan edits, deferred Excel features, JSON restore, cache
+repair, and deliberately approved updates. Worker unit tests cover failed
+downloads, immutable cached shells, cache retention, and same-origin messages.
+Automated emulation does not verify the operating system's actual installation
+UI: perform the online/home-screen/airplane-mode check on your physical phone.
 
 Unit tests use independently derived expectations, including mathematical
 effective/nominal conversions, hand-calculated prorated deposits, transfers,
@@ -226,5 +288,4 @@ saved-data protection.
 - At the maximum horizon/account count, detailed projections and on-demand decision
   searches can take longer; this version calculates in the browser main thread.
 - A single configured goal set is supported per independent scenario.
-- No deployment, source publication, paid resource, or external integration is
-  performed by this project.
+- No deployment, paid resource, or external integration is performed automatically.

@@ -163,6 +163,66 @@ pre {
   margin: auto;
   padding: 0 48px;
 }
+.phone-panel {
+  margin-top: 15px;
+  padding: 11px 16px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #fff;
+  font-size: 12px;
+}
+.phone-status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.phone-status {
+  color: var(--green);
+  font-size: 11px;
+}
+.phone-status i {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 6px;
+  background: #6d8956;
+  border-radius: 50%;
+}
+.phone-disconnected {
+  color: #966324;
+}
+.phone-disconnected i {
+  background: #bd8a4f;
+}
+.phone-panel summary {
+  font-size: 11px;
+  padding-bottom: 0;
+}
+.phone-help {
+  padding-top: 15px;
+  max-width: 1000px;
+  color: var(--muted);
+}
+.phone-help .two-column {
+  gap: 20px;
+}
+.phone-panel .warning {
+  margin: 10px 0 0;
+}
+@media (max-width: 700px) {
+  .phone-panel {
+    padding: 10px 12px;
+  }
+  .phone-status-row .actions {
+    flex-wrap: wrap;
+  }
+  .phone-panel button {
+    font-size: 11px;
+    padding: 7px 10px;
+  }
+}
 .app-header {
   display: flex;
   justify-content: space-between;

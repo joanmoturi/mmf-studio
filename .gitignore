@@ -8,3 +8,6 @@ test-results/
 .env*
 !.env.example
 next-env.d.ts
+public/sw.js
+public/mmf-offline-*.html
+public/icons/*.png

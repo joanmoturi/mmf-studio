@@ -4,3 +4,5 @@ package-lock.json
 playwright-report
 test-results
 next-env.d.ts
+public/sw.js
+public/mmf-offline-*.html

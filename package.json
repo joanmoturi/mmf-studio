@@ -4,13 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev --hostname 127.0.0.1 --port 3001",
-    "build": "next build",
+    "dev": "node scripts/generate-icons.mjs && next dev --hostname 127.0.0.1 --port 3001",
+    "build": "node scripts/generate-icons.mjs && next build && node scripts/build-service-worker.mjs",
     "start": "next start --hostname 127.0.0.1 --port 3001",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
     "test:e2e": "playwright test",
+    "test:e2e:pwa": "npm run build && playwright test --config playwright.pwa.config.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

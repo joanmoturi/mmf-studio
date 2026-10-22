@@ -18,6 +18,7 @@ import { FreedomPanel } from "./freedom-panel";
 import { ScenarioPanel } from "./scenario-panel";
 import { DataPanel } from "./data-panel";
 import { Field, currency, errorText } from "./shared";
+import { PwaPanel } from "./pwa-panel";
 
 const tabs = [
   ["projection", "Monthly projection"],
@@ -181,6 +182,7 @@ export function Planner() {
           </button>
         </div>
       </header>
+      <PwaPanel />
       <div className="workspace-header">
         <div>
           <p className="eyebrow">PERSONAL INVESTMENT PLANNER</p>
