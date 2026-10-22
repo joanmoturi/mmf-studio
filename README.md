@@ -4,6 +4,15 @@ A standalone, local-first investment and financial freedom planner built with
 Next.js, strict TypeScript, React, Zod, and Decimal.js. This is a new application
 in its own folder; it does not use or modify JOJOBUILDS.
 
+## Documentation
+
+- [Deployment guide](docs/deployment.md): free personal hosting, exact build
+  settings, deployment checks, and publishing updates.
+- [Phone and backup guide](docs/phone-guide.md): Android/iPhone installation,
+  offline checks, transferring plans, recovery, and troubleshooting.
+- The sections below cover local setup, financial calculations, privacy,
+  application limits, and development verification.
+
 ## Run on Windows
 
 Node.js 24 is supported. From PowerShell:
@@ -19,8 +28,9 @@ production both default to port 3001, leaving port 3000 for other projects.
 If you previously saved a plan on port 3000, export its JSON backup there and
 import it on port 3001; browser storage is separate for each port. For a production
 build, run `npm run build` and then `npm start`. Neither command publishes or
-deploys anything. No accounts, credentials, AI API, backend, or paid service are
-required.
+deploys anything. Local use needs no application login, credentials, AI API,
+backend, or paid service. Online hosting requires a separate hosting account;
+see the deployment guide for a free personal-use option.
 
 ## Install on your phone
 
