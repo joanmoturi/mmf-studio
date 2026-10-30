@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import Link from "next/link";
 import { evaluateIncome, incomeCapacity, project } from "@/lib/engine";
 import { newWorkspace, workspaceSchema, type Scenario, type Workspace } from "@/lib/model";
@@ -52,6 +53,7 @@ export function Planner() {
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   });
   const [tab, setTab] = useState<Tab>(loaded.blocked ? "data" : "projection");
+  const backupInput = useRef<HTMLInputElement>(null);
   const [history, setHistory] = useState<{ past: Workspace[]; future: Workspace[] }>({
     past: [],
     future: [],
@@ -179,6 +181,17 @@ export function Planner() {
           </span>
           <button className="quiet" onClick={() => downloadBackup(workspace)}>
             ↓ Back up plan
+          </button>
+          <button
+            className="quiet"
+            onClick={() => {
+              // Mount the picker in this click so mobile browsers keep the user gesture.
+              flushSync(() => setTab("data"));
+              backupInput.current?.scrollIntoView({ block: "center" });
+              backupInput.current?.click();
+            }}
+          >
+            Upload JSON backup
           </button>
         </div>
       </header>
@@ -353,6 +366,7 @@ export function Planner() {
             projection={projection}
             commit={blocked ? replaceRecovery : commit}
             recover={recover}
+            backupInputRef={backupInput}
           />
         )}
         {projection.warnings.length > 0 && (

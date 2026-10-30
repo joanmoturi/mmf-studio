@@ -1,6 +1,18 @@
 import { expect, test, type Page } from "@playwright/test";
+import { readFile } from "node:fs/promises";
 
 const KEY = "mmf-studio.workspace.v1";
+
+async function uploadBackup(page: Page, buffer: Buffer) {
+  const chooserEvent = page.waitForEvent("filechooser");
+  await page.getByRole("button", { name: "Upload JSON backup", exact: true }).click();
+  const chooser = await chooserEvent;
+  await chooser.setFiles({
+    name: "synthetic-backup.json",
+    mimeType: "application/json",
+    buffer,
+  });
+}
 
 async function addAccount(page: Page, name = "Synthetic MMF") {
   await page.getByRole("button", { name: "Accounts", exact: true }).click();
@@ -152,6 +164,89 @@ test("baseline mapping, JSON restore and real Excel export", async ({ page }) =>
   await expect(page.getByLabel("Active scenario", { exact: true })).toContainText(
     "Restored synthetic workspace",
   );
+});
+
+for (const width of [1280, 390]) {
+  test(`header JSON upload previews and restores a downloaded backup at ${width}px`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/");
+    await addAccount(page, "Synthetic backup account");
+    const downloadEvent = page.waitForEvent("download");
+    await page.getByRole("button", { name: "Back up plan", exact: false }).click();
+    const download = await downloadEvent;
+    expect(download.suggestedFilename()).toBe("mmf-workspace.json");
+    const backup = await readFile((await download.path())!);
+
+    await page.getByRole("button", { name: "Edit account", exact: true }).click();
+    await page.getByLabel("Opening principal (KES)", { exact: true }).fill("200000");
+    await page.getByRole("button", { name: "Save account", exact: true }).click();
+    const before = await page.evaluate((key) => localStorage.getItem(key), KEY);
+
+    await uploadBackup(page, backup);
+    await expect(page.getByText("1 validated scenarios", { exact: true })).toBeVisible();
+    expect(await page.evaluate((key) => localStorage.getItem(key), KEY)).toBe(before);
+    await page.getByRole("button", { name: "Cancel", exact: true }).click();
+    await expect(
+      page.getByRole("button", { name: "Confirm workspace replacement", exact: true }),
+    ).toHaveCount(0);
+    expect(await page.evaluate((key) => localStorage.getItem(key), KEY)).toBe(before);
+
+    await uploadBackup(page, backup);
+    await expect(page.getByText("1 validated scenarios", { exact: true })).toBeVisible();
+    page.once("dialog", (dialog) => dialog.dismiss());
+    await page.getByRole("button", { name: "Confirm workspace replacement", exact: true }).click();
+    expect(await page.evaluate((key) => localStorage.getItem(key), KEY)).toBe(before);
+    page.once("dialog", (dialog) => dialog.accept());
+    await page.getByRole("button", { name: "Confirm workspace replacement", exact: true }).click();
+    await expect(page.getByRole("status").filter({ hasText: "Workspace restored" })).toBeVisible();
+    expect(await page.evaluate(() => localStorage.getItem("mmf-studio.previous.v1"))).toBe(before);
+    expect(JSON.parse((await page.evaluate((key) => localStorage.getItem(key), KEY))!)).toEqual(
+      JSON.parse(backup.toString()),
+    );
+
+    await page.reload();
+    await page.getByRole("button", { name: "Accounts", exact: true }).click();
+    await page.getByRole("button", { name: "Edit account", exact: true }).click();
+    await expect(page.getByLabel("Account name", { exact: true })).toHaveValue(
+      "Synthetic backup account",
+    );
+    await expect(page.getByLabel("Opening principal (KES)", { exact: true })).toHaveValue("100000");
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+    ).toBe(true);
+  });
+}
+
+test("JSON upload rejects invalid or oversized backups without changing the saved plan", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await addAccount(page);
+  const before = await page.evaluate((key) => localStorage.getItem(key)!, KEY);
+  const error = page.getByRole("main").getByRole("alert");
+
+  await uploadBackup(page, Buffer.from("{invalid"));
+  await expect(error).toBeVisible();
+  expect(await page.evaluate((key) => localStorage.getItem(key), KEY)).toBe(before);
+
+  const unsupported = { ...JSON.parse(before), version: 999 };
+  await uploadBackup(page, Buffer.from(JSON.stringify(unsupported)));
+  await expect(error).toContainText("version");
+  expect(await page.evaluate((key) => localStorage.getItem(key), KEY)).toBe(before);
+
+  await uploadBackup(page, Buffer.alloc(10 * 1024 * 1024 + 1, " "));
+  await expect(error).toContainText("Backup exceeds 10 MB.");
+  await expect(
+    page.getByRole("button", { name: "Confirm workspace replacement", exact: true }),
+  ).toHaveCount(0);
+  expect(await page.evaluate((key) => localStorage.getItem(key), KEY)).toBe(before);
+
+  await uploadBackup(page, Buffer.from(before));
+  await expect(page.getByText("1 validated scenarios", { exact: true })).toBeVisible();
+  await expect(error).toHaveCount(0);
+  expect(await page.evaluate((key) => localStorage.getItem(key), KEY)).toBe(before);
 });
 
 test("mobile layout and unreadable-data protection", async ({ page }) => {

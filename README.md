@@ -100,6 +100,12 @@ unrelated caches are untouched. Close old tabs when practical.
 6. Duplicate a plan or create sensitivity scenarios under **Scenarios**.
 7. Export a full JSON backup under **Data & recovery**.
 
+To restore a downloaded plan, select **Upload JSON backup** beside **Back up
+plan** at the top of the app. Choose the `.json` file, review the validated
+preview, and select **Confirm workspace replacement** or **Import as separate
+scenarios**. Selecting a file does not replace your plan automatically. The same
+file picker is available under **Data & recovery > Choose JSON backup**.
+
 The initial projection window is August 2026 through December 2030. It can be
 changed without a new dataset. Limits: 600 months per projection/evaluation,
 30 accounts per scenario, 20 scenarios, and 10 MB per imported file.

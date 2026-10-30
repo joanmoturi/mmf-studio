@@ -71,8 +71,10 @@ Open **Data & recovery** and export a full JSON backup. Transfer that file to yo
 phone using a method you trust; it contains financial information.
 
 On the phone, launch the app in the context you intend to use, preferably its
-installed home-screen icon. Under **Data & recovery**, choose the JSON backup,
-review the restore preview, and confirm workspace replacement.
+installed home-screen icon. Select **Upload JSON backup** beside **Back up plan**
+at the top of the app, choose your `.json` file, review the restore preview, and
+confirm workspace replacement. You can also use **Data & recovery > Choose JSON
+backup**.
 
 **Restoring replaces the current workspace; it does not merge plans.** Export any
 existing phone workspace first. After restoration, check account balances,

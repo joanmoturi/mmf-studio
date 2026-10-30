@@ -114,7 +114,11 @@ test("a fresh offline launch edits and restores plans and loads deferred spreads
   await offline.getByRole("button", { name: "Cancel import", exact: true }).click();
   const restored = JSON.parse(saved);
   restored.scenarios[0].name = "Offline restored scenario";
-  await offline.getByLabel("Choose JSON backup", { exact: true }).setInputFiles({
+  await offline.getByRole("button", { name: "Monthly projection", exact: true }).click();
+  const chooserEvent = offline.waitForEvent("filechooser");
+  await offline.getByRole("button", { name: "Upload JSON backup", exact: true }).click();
+  const chooser = await chooserEvent;
+  await chooser.setFiles({
     name: "synthetic-offline-backup.json",
     mimeType: "application/json",
     buffer: Buffer.from(JSON.stringify(restored)),

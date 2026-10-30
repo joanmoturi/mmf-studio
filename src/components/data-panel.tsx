@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type RefObject } from "react";
 import { newId, workspaceSchema, type Workspace } from "@/lib/model";
-import { parseWorkspace, STORAGE_KEY, BACKUP_KEY } from "@/lib/storage";
+import { parseWorkspace, STORAGE_KEY, BACKUP_KEY, MAX_IMPORT_BYTES } from "@/lib/storage";
 import {
   SAMPLE_BASELINE,
   download,
@@ -22,11 +22,13 @@ export function DataPanel({
   projection,
   commit,
   recover,
+  backupInputRef,
 }: {
   workspace: Workspace;
   projection: Projection;
   commit: (workspace: Workspace) => boolean;
   recover: () => void;
+  backupInputRef: RefObject<HTMLInputElement | null>;
 }) {
   const scenario = workspace.scenarios.find((item) => item.id === workspace.activeId)!;
   const [data, setData] = useState<ImportData | null>(null);
@@ -149,25 +151,27 @@ export function DataPanel({
         <section className="card">
           <h3>Restore a full workspace</h3>
           <p className="muted">
-            Validate and preview before replacing anything. The previous valid saved revision
-            remains recoverable.
+            Upload a JSON backup downloaded from MMF Studio. Validate and preview before replacing
+            anything. The previous valid saved revision remains recoverable.
           </p>
           <Field label="Choose JSON backup">
             <input
+              ref={backupInputRef}
               type="file"
               accept=".json,application/json"
               onChange={async (event) => {
                 const file = event.target.files?.[0];
+                event.target.value = "";
                 if (!file) return;
                 setError("");
+                setMessage("");
                 setPending(null);
                 try {
-                  if (file.size > 10 * 1024 * 1024) throw new Error("Backup exceeds 10 MB.");
+                  if (file.size > MAX_IMPORT_BYTES) throw new Error("Backup exceeds 10 MB.");
                   setPending(parseWorkspace(await file.text()));
                 } catch (caught) {
                   setError(errorText(caught));
                 }
-                event.target.value = "";
               }}
             />
           </Field>
